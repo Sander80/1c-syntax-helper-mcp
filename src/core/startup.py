@@ -11,6 +11,22 @@ from src.infrastructure.background.indexing_manager import get_indexing_manager
 logger = get_logger(__name__)
 
 
+HBK_CANDIDATES = ("1c_documentation.hbk", "shcntx_ru.hbk")
+
+
+def find_hbk_file(directory: str) -> Path | None:
+    """Найти .hbk: сначала известные имена, затем единственный *.hbk."""
+    base = Path(directory)
+    for name in HBK_CANDIDATES:
+        candidate = base / name
+        if candidate.exists():
+            return candidate
+    files = sorted(base.glob("*.hbk"))
+    if len(files) == 1:
+        return files[0]
+    return None
+
+
 async def auto_index_on_startup(es_client: ElasticsearchClient):
     """
     Автоматическая индексация в фоновом режиме при запуске.
@@ -24,11 +40,11 @@ async def auto_index_on_startup(es_client: ElasticsearchClient):
         es_client: Подключённый клиент Elasticsearch
     """
     try:
-        # Определяем путь к единственному .hbk файлу
-        hbk_file = Path(settings.data.hbk_directory) / "shcntx_ru.hbk"
+        # Определяем путь к .hbk файлу
+        hbk_file = find_hbk_file(settings.data.hbk_directory)
         
-        if not hbk_file.exists():
-            logger.warning(f"Файл .hbk не найден: {hbk_file}")
+        if hbk_file is None:
+            logger.warning(f"Файл .hbk не найден в {settings.data.hbk_directory}")
             return
         
         # Проверяем, нужна ли принудительная переиндексация

@@ -13,6 +13,10 @@ logger = get_logger(__name__)
 
 async def rate_limit_middleware(request: Request, call_next):
     """Middleware для ограничения скорости запросов."""
+    # Healthcheck и метрики не должны расходовать лимит клиента.
+    if request.url.path in ("/health", "/metrics"):
+        return await call_next(request)
+
     rate_limiter = get_rate_limiter()
     metrics = get_metrics_collector()
     

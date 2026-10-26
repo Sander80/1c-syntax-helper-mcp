@@ -2,6 +2,8 @@
 Константы проекта.
 """
 
+import os
+
 # Elasticsearch настройки
 ELASTICSEARCH_DEFAULT_HOST = "localhost"
 ELASTICSEARCH_DEFAULT_PORT = 9200
@@ -18,9 +20,9 @@ SUPPORTED_ENCODINGS = ["utf-8", "cp1251", "iso-8859-1"]
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-# Rate limiting
-REQUESTS_PER_MINUTE = 60
-REQUESTS_PER_HOUR = 1000
+# Rate limiting (переопределяется env RATE_LIMIT_PER_MINUTE / RATE_LIMIT_PER_HOUR)
+REQUESTS_PER_MINUTE = int(os.getenv("RATE_LIMIT_PER_MINUTE", "600"))
+REQUESTS_PER_HOUR = int(os.getenv("RATE_LIMIT_PER_HOUR", "20000"))
 
 # Поиск
 MAX_SEARCH_RESULTS = 100
